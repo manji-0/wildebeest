@@ -20,12 +20,12 @@ export async function handleRequest(domain: string, db: Database, env: Env) {
 		domain,
 		title: env.INSTANCE_TITLE,
 		version: getVersion(),
-		source_url: 'https://github.com/cloudflare/wildebeest',
+		source_url: 'https://github.com/manji-0/wildebeest',
 		description: env.INSTANCE_DESCR,
 		thumbnail: {
 			url: DEFAULT_THUMBNAIL,
 		},
-		languages: ['en'],
+		languages: ['ja'],
 		registrations: {
 			// Registration is disabled because unsupported by Wildebeest. Users
 			// should go through the login flow and authenticate with Access.
