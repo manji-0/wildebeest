@@ -50,7 +50,7 @@ export async function handleRequest(domain: string, db: D1Database, env: Env) {
 				min_expiration: 300,
 				max_expiration: 2629746
 			}
-		}
+		},
 		registrations: {
 			// Registration is disabled because unsupported by Wildebeest. Users
 			// should go through the login flow and authenticate with Access.
