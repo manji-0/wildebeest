@@ -21,10 +21,20 @@ export async function handleRequest(): Promise<Response> {
 			repository: 'https://github.com/cloudflare/wildebeest',
 		},
 		protocols: ['activitypub'],
-		services: { outbound: [], inbound: [] },
-		usage: { users: {} },
+		usage: {
+			users: {
+				total: 1,
+				activeMonth: 1,
+				activeHalfyear: 1
+			}
+		},
 		openRegistrations: false,
-		metadata: {},
+		metadata: {
+			upstream: {
+				name: 'mastodon',
+				version: '3.5.1'
+			}
+		},
 	}
 
 	return new Response(JSON.stringify(res), { headers })

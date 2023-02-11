@@ -14,14 +14,27 @@ export const onRequest: PagesFunction<Env, any> = async () => {
 
 export async function handleRequest(): Promise<Response> {
 	const res = {
-		version: '2.0',
-		software: { name: 'wildebeest', version: WILDEBEEST_VERSION },
+		version: '2.1',
+		software: {
+			name: 'wildebeest',
+			version: WILDEBEEST_VERSION,
+			repository: 'https://github.com/manji-0/wildebeest',
+		},
 		protocols: ['activitypub'],
-		services: { outbound: [], inbound: [] },
-		usage: { users: {} },
+		usage: {
+			users: {
+				total: 1,
+				activeMonth: 1,
+				activeHalfyear: 1
+			}
+		},
 		openRegistrations: false,
-		metadata: {},
+		metadata: {
+			upstream: {
+				name: 'mastodon',
+				version: '3.5.1'
+			}
+		},
 	}
-
 	return new Response(JSON.stringify(res), { headers })
 }
