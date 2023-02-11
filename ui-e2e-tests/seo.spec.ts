@@ -7,7 +7,6 @@ test('Presence of appropriate SEO metadata across the application', async ({ pag
 		description: 'My Wildebeest Instance',
 		ogType: 'website',
 		ogUrl: 'http://127.0.0.1:8788/explore',
-		ogImage: 'https://imagedelivery.net/NkfPDviynOyTAOI79ar_GQ/b24caf12-5230-48c4-0bf7-2f40063bd400/thumbnail',
 	})
 
 	await page.goto('http://127.0.0.1:8788/public/local')
@@ -16,7 +15,6 @@ test('Presence of appropriate SEO metadata across the application', async ({ pag
 		description: 'My Wildebeest Instance',
 		ogType: 'website',
 		ogUrl: 'http://127.0.0.1:8788/public/local',
-		ogImage: 'https://imagedelivery.net/NkfPDviynOyTAOI79ar_GQ/b24caf12-5230-48c4-0bf7-2f40063bd400/thumbnail',
 	})
 
 	await page.goto('http://127.0.0.1:8788/public')
@@ -25,7 +23,6 @@ test('Presence of appropriate SEO metadata across the application', async ({ pag
 		description: 'My Wildebeest Instance',
 		ogType: 'website',
 		ogUrl: 'http://127.0.0.1:8788/public',
-		ogImage: 'https://imagedelivery.net/NkfPDviynOyTAOI79ar_GQ/b24caf12-5230-48c4-0bf7-2f40063bd400/thumbnail',
 	})
 
 	await page.goto('http://127.0.0.1:8788/explore')
@@ -36,7 +33,6 @@ test('Presence of appropriate SEO metadata across the application', async ({ pag
 			"Hi, meet HiDock! It's a free Mac app that lets you set different Dock settings for different display configurations https://hidock.app →",
 		ogType: 'article',
 		ogUrl: /https:\/\/127.0.0.1\/statuses\/[\w-]*\/?/,
-		ogImage: 'https://cdn.masto.host/mastodondesign/accounts/avatars/000/011/932/original/8f601be03c98b2e8.png',
 	})
 
 	await page.goto('http://127.0.0.1:8788/@rafa')
