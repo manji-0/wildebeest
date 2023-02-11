@@ -35,17 +35,21 @@ export async function handleRequest(domain: string, env: Env) {
 	res.configuration = {
 		statuses: {
 			max_characters: 3000,
-			max_media_attachments: 1,
+			max_media_attachments: 4,
 			characters_reserved_per_url: 23
 		},
-		res.media_attachments = {
+		media_attachments: {
 			supported_mime_types: [
 				"image/jpeg",
 				"image/png",
 				"image/gif",
 				"image/webp"
 			],
-			image_size_limit: 20971520
+			image_size_limit: 20971520,
+			image_matrix_limit: 33554432,
+			video_size_limit: 0,
+			video_frame_rate_limit: 0,
+			video_matrix_limit: 0
 		},
 		polls: {
 			max_options: 4,
