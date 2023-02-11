@@ -29,7 +29,31 @@ export async function handleRequest(domain: string, env: Env) {
 	res.title = env.INSTANCE_TITLE
 	res.email = env.ADMIN_EMAIL
 	res.description = env.INSTANCE_DESCR
-
+	res.languages = ["ja", "en"]
+	res.approval_required = false
+	res.invites_enabled = true
+	res.configuration = {
+		statuses: {
+			max_characters: 3000,
+			max_media_attachments: 1,
+			characters_reserved_per_url: 23
+		},
+		res.media_attachments = {
+			supported_mime_types: [
+				"image/jpeg",
+				"image/png",
+				"image/gif",
+				"image/webp"
+			],
+			image_size_limit: 20971520
+		},
+		polls: {
+			max_options: 4,
+			max_characters_per_option: 50,
+			min_expiration: 300,
+			max_expiration: 2629746
+		}
+	}
 	res.short_description = res.description
 
 	return new Response(JSON.stringify(res), { headers })
