@@ -25,7 +25,7 @@ const AVATAR_VARIANT = 'avatar'
 // https://docs.joinmastodon.org/user/profile/#header
 const HEADER_VARIANT = 'header'
 
-const USER_CONTENT_VARIANT = 'usercontent'
+const USER_CONTENT_VARIANT = 'image'
 
 async function upload(file: File, config: Config): Promise<UploadResult> {
 	const formData = new FormData()

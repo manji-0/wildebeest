@@ -58,9 +58,9 @@ jobs:
               -d '{
                   "id": "avatar",
                   "options": {
-                      "metadata": "copyright",
-                      "width": 400,
-                      "height": 400
+                      "metadata": "none",
+                      "width": 500,
+                      "height": 500
                   }
               }' \
               -H 'Authorization: Bearer ${{ secrets.CF_API_TOKEN }}'
@@ -69,7 +69,7 @@ jobs:
               -d '{
                   "id": "header",
                   "options": {
-                      "metadata": "copyright",
+                      "metadata": "none",
                       "width": 1500,
                       "height": 500
                   }
@@ -78,9 +78,9 @@ jobs:
 
           curl -XPOST https://api.cloudflare.com/client/v4/accounts/${{ secrets.CF_ACCOUNT_ID }}/images/v1/variants \
               -d '{
-                  "id": "usercontent",
+                  "id": "image",
                   "options": {
-                      "metadata": "copyright"
+                      "metadata": "none"
                   }
               }' \
               -H 'Authorization: Bearer ${{ secrets.CF_API_TOKEN }}'
