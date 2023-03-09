@@ -7,16 +7,18 @@ import * as errors from 'wildebeest/backend/src/errors'
 import { getClientById } from 'wildebeest/backend/src/mastodon/client'
 import * as access from 'wildebeest/backend/src/access'
 import { getPersonByEmail } from 'wildebeest/backend/src/activitypub/actors'
+import { type Database, getDatabase } from 'wildebeest/backend/src/database'
+import { isUserAuthenticated } from 'wildebeest/backend/src/utils/auth/isUserAuthenticated'
 
 // Extract the JWT token sent by Access (running before us).
 const extractJWTFromRequest = (request: Request) => request.headers.get('Cf-Access-Jwt-Assertion') || ''
 
 export const onRequestPost: PagesFunction<Env, any, ContextData> = async ({ request, env }) => {
-	return handleRequestPost(request, env.DATABASE, env.userKEK, env.ACCESS_AUTH_DOMAIN, env.ACCESS_AUD)
+	return handleRequestPost(request, await getDatabase(env), env.userKEK, env.ACCESS_AUTH_DOMAIN, env.ACCESS_AUD)
 }
 
 export async function buildRedirect(
-	db: D1Database,
+	db: Database,
 	request: Request,
 	isFirstLogin: boolean,
 	jwt: string
@@ -48,7 +50,7 @@ export async function buildRedirect(
 
 	const redirect_uri = url.searchParams.get('redirect_uri')
 	if (client.redirect_uris !== redirect_uri) {
-		return new Response('', { status: 403 })
+		return errors.validationError('redirect_uri not allowed')
 	}
 
 	const code = `${client.id}.${jwt}`
@@ -64,7 +66,7 @@ export async function buildRedirect(
 
 export async function handleRequestPost(
 	request: Request,
-	db: D1Database,
+	db: Database,
 	userKEK: string,
 	accessDomain: string,
 	accessAud: string
@@ -78,18 +80,14 @@ export async function handleRequestPost(
 	}
 
 	const jwt = extractJWTFromRequest(request)
-	if (!jwt) {
+	const isAuthenticated = await isUserAuthenticated(request, jwt, accessDomain, accessAud)
+
+	if (!isAuthenticated) {
 		return new Response('', { status: 401 })
 	}
-	const validate = access.generateValidator({ jwt, domain: accessDomain, aud: accessAud })
-	await validate(request)
 
 	const identity = await access.getIdentity({ jwt, domain: accessDomain })
-	if (!identity) {
-		return new Response('', { status: 401 })
-	}
-
-	const isFirstLogin = (await getPersonByEmail(db, identity.email)) === null
+	const isFirstLogin = (await getPersonByEmail(db, identity!.email)) === null
 
 	return buildRedirect(db, request, isFirstLogin, jwt)
 }

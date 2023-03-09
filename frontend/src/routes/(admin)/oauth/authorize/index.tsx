@@ -1,5 +1,4 @@
 import { component$ } from '@builder.io/qwik'
-import * as access from 'wildebeest/backend/src/access'
 import type { Client } from 'wildebeest/backend/src/mastodon/client'
 import { getClientById } from 'wildebeest/backend/src/mastodon/client'
 import { DocumentHead, loader$ } from '@builder.io/qwik-city'
@@ -8,68 +7,64 @@ import { Avatar } from '~/components/avatar'
 import { getPersonByEmail } from 'wildebeest/backend/src/activitypub/actors'
 import { getErrorHtml } from '~/utils/getErrorHtml/getErrorHtml'
 import { buildRedirect } from 'wildebeest/functions/oauth/authorize'
+import { getDatabase } from 'wildebeest/backend/src/database'
+import { getJwtEmail } from 'wildebeest/backend/src/utils/auth/getJwtEmail'
 
-export const clientLoader = loader$<{ DATABASE: D1Database }, Promise<Client>>(async ({ platform, query, html }) => {
+export const clientLoader = loader$<Promise<Client>>(async ({ platform, query, html }) => {
 	const client_id = query.get('client_id') || ''
 	let client: Client | null = null
 	try {
-		client = await getClientById(platform.DATABASE, client_id)
-	} catch {
+		client = await getClientById(await getDatabase(platform), client_id)
+	} catch (e: unknown) {
+		const error = e as { stack: string; cause: string }
+		console.warn(error.stack, error.cause)
 		throw html(500, getErrorHtml('An error occurred while trying to fetch the client data, please try again later'))
 	}
 	if (client === null) {
-		throw new Error('client not found')
+		throw html(500, getErrorHtml('client not found'))
 	}
 	return client
 })
 
-export const userLoader = loader$<
-	{ DATABASE: D1Database; domain: string },
-	Promise<{ email: string; avatar: URL; name: string; url: URL }>
->(async ({ cookie, platform, html, request, redirect, text }) => {
-	const jwt = cookie.get('CF_Authorization')
-	if (jwt === null) {
-		throw html(500, getErrorHtml('Missing Authorization'))
-	}
-	let payload: access.JWTPayload
-	try {
-		// TODO: eventually, verify the JWT with Access, however this
-		// is not critical.
-		payload = access.getPayload(jwt.value)
-	} catch (err: unknown) {
-		console.warn((err as { stack: unknown }).stack)
-		throw html(500, getErrorHtml('Failed to validate Access JWT'))
-	}
-
-	if (!payload.email) {
-		throw html(500, getErrorHtml("The Access JWT doesn't contain an email"))
-	}
-
-	const person = await getPersonByEmail(platform.DATABASE, payload.email)
-	if (person === null) {
-		const isFirstLogin = true
-		const res = await buildRedirect(platform.DATABASE, request as Request, isFirstLogin, jwt.value)
-		if (res.status === 302) {
-			throw redirect(302, res.headers.get('location') || '')
-		} else {
-			throw text(res.status, await res.text())
+export const userLoader = loader$<Promise<{ email: string; avatar: URL; name: string; url: URL }>>(
+	async ({ cookie, platform, html, request, redirect, text }) => {
+		const jwt = cookie.get('CF_Authorization')
+		let email = ''
+		try {
+			email = getJwtEmail(jwt?.value ?? '')
+		} catch (e) {
+			throw html(500, getErrorHtml((e as Error)?.message))
 		}
+
+		const person = await getPersonByEmail(await getDatabase(platform), email)
+		if (person === null) {
+			const isFirstLogin = true
+			/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				-- jwt is defined otherwise getJwtEmail would have thrown
+			*/
+			const res = await buildRedirect(await getDatabase(platform), request as Request, isFirstLogin, jwt!.value)
+			if (res.status === 302) {
+				throw redirect(302, res.headers.get('location') || '')
+			} else {
+				throw text(res.status, await res.text())
+			}
+		}
+
+		const name = person.name
+		const avatar = person.icon?.url
+		const url = person.url
+
+		if (!name || !avatar) {
+			throw html(500, getErrorHtml("The person associated with the Access JWT doesn't include a name or avatar"))
+		}
+
+		return { email, avatar, name, url }
 	}
-
-	const name = person.name
-	const avatar = person.icon?.url
-	const url = person.url
-
-	if (!name || !avatar) {
-		throw html(500, getErrorHtml("The person associated with the Access JWT doesn't include a name or avatar"))
-	}
-
-	return { email: payload.email, avatar, name, url }
-})
+)
 
 export default component$(() => {
-	const client = clientLoader.use().value
-	const { email, avatar, name: display_name, url } = userLoader.use().value
+	const client = clientLoader().value
+	const { email, avatar, name: display_name, url } = userLoader().value
 	return (
 		<div class="flex flex-col p-4 items-center">
 			<h1 class="text-center mt-3 mb-5 flex items-center">
@@ -87,6 +82,7 @@ export default component$(() => {
 									url: url.toString(),
 								}}
 								secondary={null}
+								withLinks={true}
 							/>
 						</div>
 						<p class="col-start-2">Signed in as:</p>

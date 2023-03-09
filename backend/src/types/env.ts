@@ -1,7 +1,8 @@
 import type { Queue, MessageBody } from 'wildebeest/backend/src/types/queue'
+import { type Database } from 'wildebeest/backend/src/database'
 
 export interface Env {
-	DATABASE: D1Database
+	DATABASE: Database
 	// FIXME: shouldn't it be USER_KEY?
 	userKEK: string
 	QUEUE: Queue<MessageBody>
@@ -24,4 +25,6 @@ export interface Env {
 	SENTRY_DSN: string
 	SENTRY_ACCESS_CLIENT_ID: string
 	SENTRY_ACCESS_CLIENT_SECRET: string
+
+	NEON_DATABASE_URL?: string
 }

@@ -85,7 +85,7 @@ describe('Mastodon APIs', () => {
 				headers,
 			})
 			const res = await oauth_authorize.handleRequestPost(req, db, userKEK, accessDomain, accessAud)
-			assert.equal(res.status, 403)
+			assert.equal(res.status, 422)
 		})
 
 		test('authorize redirects with code on success and show first login', async () => {
@@ -239,6 +239,26 @@ describe('Mastodon APIs', () => {
 			const res = await oauth_authorize.handleRequestPost(req, db, userKEK, accessDomain, accessAud)
 			assert.equal(res.status, 200)
 			assertCORS(res)
+		})
+
+		test('token handles code in URL', async () => {
+			const db = await makeDB()
+			const client = await createTestClient(db, 'https://localhost')
+
+			const code = client.id + '.a'
+
+			const req = new Request('https://example.com/oauth/token?code=' + code, {
+				method: 'POST',
+				headers: {
+					'content-type': 'application/json',
+				},
+				body: '',
+			})
+			const res = await oauth_token.handleRequest(db, req)
+			assert.equal(res.status, 200)
+
+			const data = await res.json<any>()
+			assert.equal(data.access_token, code)
 		})
 	})
 })
