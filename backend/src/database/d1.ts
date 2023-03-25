@@ -26,8 +26,8 @@ const qb: QueryBuilder = {
 		return ''
 	},
 
-	jsonArray(r: string): string {
-		return `json_array(${r})`
+	jsonSet(obj: string, field: string, value: string): string {
+		return `json_set(${obj}, '$.${field}', ${value})`
 	},
 }
 
